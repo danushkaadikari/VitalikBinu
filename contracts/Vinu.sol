@@ -149,7 +149,7 @@ interface IUniswapV2Router02 {
 contract VINU is Context, IERC20, Ownable {
     using SafeMath for uint256;
     string private constant _name = "Vitalik B Inu";
-    string private constant _symbol = "$VINU";
+    string private constant _symbol = "$VBINU";
     uint8 private constant _decimals = 9;
     mapping(address => uint256) private _rOwned;
     mapping(address => uint256) private _tOwned;
