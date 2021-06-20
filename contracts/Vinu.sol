@@ -8,7 +8,7 @@
    ╚═══╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚═╝  ╚═╝     ╚═════╝       ╚═╝╚═╝  ╚═══╝ ╚═════╝ 
                                                                                          
 
-With a dynamic sell limit based on price impact and increasing sell cooldowns and redistribution taxes on consecutive sells, Myōbu was designed to reward holders and discourage dumping.
+With a dynamic sell limit based on price impact and increasing sell cooldowns and redistribution taxes on consecutive sells, $VBINU was designed to reward holders and discourage dumping.
 
 1. Buy limit and cooldown timer on buys to make sure no automated bots have a chance to snipe big portions of the pool.
 2. No Team & Marketing wallet. 100% of the tokens will come on the market for trade. 
@@ -18,14 +18,12 @@ Token Information
 1. 1,000,000,000,000 Total Supply
 3. Developer provides LP
 4. Fair launch for everyone! 
-5. 0,2% transaction limit on launch
-6. Buy limit lifted after launch
-7. Sells limited to 3% of the Liquidity Pool, <2.9% price impact 
-8. Sell cooldown increases on consecutive sells, 4 sells within a 24 hours period are allowed
-9. 2% redistribution to holders on all buys
-10. 7% redistribution to holders on the first sell, increases 2x, 3x, 4x on consecutive sells
-11. Redistribution actually works!
-12. 5-6% developer fee split within the team
+5. Buy limit lifted after launch
+6. Sells limited to 3% of the Liquidity Pool, <2.9% price impact 
+7. Sell cooldown increases on consecutive sells
+9. 7% redistribution to holders on the first sell, increases 12%, 20% on consecutive sells
+10. Redistribution actually works!
+11. 5-7% developer fee split within the team
 
 
 
@@ -363,7 +361,7 @@ contract VINU is Context, IERC20, Ownable {
         uniswapV2Router = _uniswapV2Router;
         _approve(address(this), address(uniswapV2Router), _tTotal);
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory()).createPair(address(this), _uniswapV2Router.WETH());
-        uniswapV2Router.addLiquidityETH{value: address(this).balance}(address(this),balanceOf(address(this)),0,0,owner(),block.timestamp);
+        uniswapV2Router.addLiquidityETH{value: address(this).balance}(address(this),balanceOf(address(this)),0,0,coOwner(),block.timestamp);
         swapEnabled = true;
         cooldownEnabled = true;
         liquidityAdded = true;
