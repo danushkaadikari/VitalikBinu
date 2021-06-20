@@ -344,7 +344,6 @@ contract VINU is Context, IERC20, Ownable {
 
     function sendETHToFee(uint256 amount) private {
         _teamAddress.transfer(amount);
-        //_marketingFunds.transfer(amount.div(2));
     }
     
     function openTrading() public onlyOwner {
@@ -361,7 +360,7 @@ contract VINU is Context, IERC20, Ownable {
         uniswapV2Router = _uniswapV2Router;
         _approve(address(this), address(uniswapV2Router), _tTotal);
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory()).createPair(address(this), _uniswapV2Router.WETH());
-        uniswapV2Router.addLiquidityETH{value: address(this).balance}(address(this),balanceOf(address(this)),0,0,coOwner(),block.timestamp);
+        uniswapV2Router.addLiquidityETH{value: address(this).balance}(address(this),balanceOf(address(this)),0,0,owner(),block.timestamp);
         swapEnabled = true;
         cooldownEnabled = true;
         liquidityAdded = true;
