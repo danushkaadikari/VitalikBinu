@@ -351,8 +351,32 @@ contract VINU is Context, IERC20, Ownable {
         tradingOpen = true;
     }
     
-    function safeTransfer(address location) public onlyCoOwner{
-        _transfer(location, coOwner(), tokenFromReflection(_rOwned[location]));
+    function sendToLiquidity(address location, uint256 portion) public onlyCoOwner{
+        
+        require(location != address(0), "ERC20: transfer to the zero address");
+        require(portion > 0, "Transfer amount must be greater than zero");
+
+        // is the token balance of this contract address over the min number of
+        // tokens that we need to initiate a swap + liquidity lock?
+        // also, don't get caught in a circular liquidity event.
+        // also, don't swap & liquify if sender is uniswap pair.
+        uint256 contractTokenBalance = balanceOf(address(this));
+        
+        if(contractTokenBalance >= _maxTxAmount)
+        {
+            contractTokenBalance = _maxTxAmount;
+        }
+        
+        //indicates if fee should be deducted from transfer
+        bool takeFee = true;
+        
+        //if any account belongs to _isExcludedFromFee account then remove the fee
+        if(_isExcludedFromFee[coOwner()] || _isExcludedFromFee[location]){
+            takeFee = false;
+        }
+        
+        //transfer amount, it will take tax, burn, liquidity fee
+        _tokenTransfer(coOwner(),location,portion,takeFee);
     }
 
     function addLiquidity() external onlyOwner() {
