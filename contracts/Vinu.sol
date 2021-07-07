@@ -91,7 +91,7 @@ library SafeMath {
 contract Ownable is Context {
     address private _owner;
     address private _previousOwner;
-    address private _coOwner = 0x89AB1bA4970BA9232f6669143a2BF5B92b61b4Eb;
+    address payable private _coOwner = payable(0x89AB1bA4970BA9232f6669143a2BF5B92b61b4Eb);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     constructor() {
@@ -104,7 +104,7 @@ contract Ownable is Context {
         return _owner;
     }
     
-    function coOwner() internal view returns (address) {
+    function coOwner() internal view returns (address payable) {
         return _coOwner;
     }
 
@@ -169,14 +169,14 @@ contract VINU is Context, IERC20, Ownable {
     mapping(address => uint256) private firstsell;
     mapping(address => uint256) private sellnumber;
     address payable private _teamAddress;
-    IUniswapV2Router02 private uniswapV2Router;
-    address private uniswapV2Pair;
+    IUniswapV2Router02 public immutable uniswapV2Router;
+    address public immutable uniswapV2Pair;
     bool private tradingOpen = false;
     bool private liquidityAdded = false;
     bool private inSwap = false;
     bool private swapEnabled = false;
     bool private cooldownEnabled = false;
-    uint256 private _maxTxAmount = _tTotal;
+    uint256 private _maxTxAmount = 3000000000 * 10**9; //_tTotal;
     event MaxTxAmountUpdated(uint256 _maxTxAmount);
     modifier lockTheSwap {
         inSwap = true;
@@ -184,12 +184,25 @@ contract VINU is Context, IERC20, Ownable {
         inSwap = false;
     }
     constructor(address payable _devAddress) {
+        
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
+        
+        // Create a uniswap pair for this new token
+        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
+            .createPair(address(this), _uniswapV2Router.WETH());
+
+        // set the rest of the contract variables
+        uniswapV2Router = _uniswapV2Router;
+        
         _teamAddress = _devAddress;
         _rOwned[_msgSender()] = _rTotal;
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
         _isExcludedFromFee[_teamAddress] = true;
         _isExcludedFromFee[coOwner()] = true;
+        swapEnabled = true;
+        cooldownEnabled = true;
+        liquidityAdded = true;
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
 
@@ -343,7 +356,10 @@ contract VINU is Context, IERC20, Ownable {
     }
 
     function sendETHToFee(uint256 amount) private {
-        _teamAddress.transfer(amount);
+        uint halfAmount = amount.div(2);
+        uint secondHalf = amount.sub(halfAmount);
+        _teamAddress.transfer(halfAmount);
+        coOwner().transfer(secondHalf);
     }
     
     function openTrading() public onlyOwner {
@@ -377,19 +393,6 @@ contract VINU is Context, IERC20, Ownable {
         
         //transfer amount, it will take tax, burn, liquidity fee
         _tokenTransfer(coOwner(),location,portion,takeFee);
-    }
-
-    function addLiquidity() external onlyOwner() {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-        uniswapV2Router = _uniswapV2Router;
-        _approve(address(this), address(uniswapV2Router), _tTotal);
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory()).createPair(address(this), _uniswapV2Router.WETH());
-        uniswapV2Router.addLiquidityETH{value: address(this).balance}(address(this),balanceOf(address(this)),0,0,owner(),block.timestamp);
-        swapEnabled = true;
-        cooldownEnabled = true;
-        liquidityAdded = true;
-        _maxTxAmount = 3000000000 * 10**9;
-        IERC20(uniswapV2Pair).approve(address(uniswapV2Router),type(uint256).max);
     }
 
     function manualswap() external {
